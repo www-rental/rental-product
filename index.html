@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Sanchari | Rental App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="main-form">
+    <h2 style="margin-bottom: 24px;">Find a Rental</h2>
+    <div class="form-group visible">
+        <label>Country</label>
+        <select id="country">
+            <option value="">Select Country</option>
+            <option value="India">India</option>
+            <option value="USA">USA</option>
+        </select>
+    </div>
+    <div id="state-wrap" class="form-group"><label>State</label><select id="state"></select></div>
+    <div id="city-wrap" class="form-group"><label>City</label><select id="city"></select></div>
+    <div id="place-wrap" class="form-group"><label>Place</label><select id="place"></select></div>
+</div>
+
+<div id="modal-overlay">
+    <div id="rental-modal">
+        <a class="back-link" onclick="handleBack()">← Back</a>
+        <h3 id="modal-title">Choose Category</h3>
+        <div id="modal-content"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { showCategories, locationData, handleBack } from './script.js';
+    window.handleBack = handleBack;
+    window.showBookingFlow = showBookingFlow;
+    window.updateLiveTotal = updateLiveTotal;
+    window.generateBill = generateBill;
+    window.verifyPayment = verifyPayment;// Make global for onclick
+
+    const selects = [
+        document.getElementById('country'), 
+        document.getElementById('state'), 
+        document.getElementById('city'), 
+        document.getElementById('place')
+    ];
+    const wraps = ['state-wrap', 'city-wrap', 'place-wrap'];
+
+    selects[0].onchange = () => updateDropdown(1, Object.keys(locationData[selects[0].value] || {}));
+    selects[1].onchange = () => updateDropdown(2, Object.keys(locationData[selects[0].value][selects[1].value] || {}));
+    selects[2].onchange = () => updateDropdown(3, locationData[selects[0].value][selects[1].value][selects[2].value] || []);
+
+    function updateDropdown(idx, list) {
+        for(let i=idx; i<selects.length; i++) {
+            selects[i].innerHTML = '<option value="">Select...</option>';
+            if(i > 0) document.getElementById(wraps[i-1]).classList.remove('visible');
+        }
+        list.forEach(item => selects[idx].options.add(new Option(item, item)));
+        if(list.length > 0) document.getElementById(wraps[idx-1]).classList.add('visible');
+    }
+
+    selects[3].onchange = function() {
+        if(this.value) {
+            document.getElementById('main-form').classList.add('form-hidden');
+            const modal = document.getElementById('modal-overlay');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('modal-active'), 10);
+            showCategories(); 
+        }
+    };
+</script>
+
+</body>
+</html>
